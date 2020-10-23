@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 
 using EFFundamentals.Models;
 
@@ -61,9 +62,29 @@ namespace EFFundamentals
             //
             // DELETE FROM employees WHERE no_emp = 10;
             //
-            //Employees emp = context.Employees.Find(new object[] { 10 });
-            //context.Employees.Remove(emp);
+            //Employees emp = context.Employees.Find (new object [] { 10 });
+            //context.Employees.Remove (emp);
             //context.SaveChanges();
+
+
+            // esta forma de consulta utiliza la función extendida Where, utilizando la función lambda como
+            // forma de filtrado
+            Employees employee = context.Employees.Where<Employees>(e => e.FirstName == "AAA").FirstOrDefault<Employees>();
+            employee.LastName = "CCC";
+            context.SaveChanges();
+
+            // en esta forma se utiliza la forma de selección que utiliza una estructura tipo sql para definir
+            // los parámetros de la consulta
+            Departments dept = (from d in context.Departments
+                               where d.DeptNo == "9999" select d).FirstOrDefault<Departments> ();
+
+            dept.DeptName = "PROGRAMACION DE SISTEMAS BASADOS EN WEB";
+            context.SaveChanges();
+
+            // la función First devuelve el primer registro de la colección consultada
+            Employees e1 = context.Employees.First<Employees>();
+            Console.WriteLine("{0} {1}", e1.FirstName, e1.LastName);
+
 
             // SELECT employees.first_name FROM employees INNER JOIN
             // (SELECT dept_manager.emp_no FROM dept_manager INNER JOIN departments ON
