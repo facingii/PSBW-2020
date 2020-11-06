@@ -1,0 +1,17 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmployeesWebService", "EmployeesWebService\EmployeesWebService.csproj", "{BC48E7FD-5285-47A6-8C1C-5A90313B280A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BC48E7FD-5285-47A6-8C1C-5A90313B280A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BC48E7FD-5285-47A6-8C1C-5A90313B280A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BC48E7FD-5285-47A6-8C1C-5A90313B280A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BC48E7FD-5285-47A6-8C1C-5A90313B280A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
