@@ -12,12 +12,13 @@ namespace EmployeesWebService.Controllers
 {
     public class Empleado
     {
+        public int EmpNo { get; set; }
         public String Nombre { get; set; }
         public String Apellidos { get; set; }
         public String Titulo { get; set; }
         public int Salario { get; set; }
-        public DateTime DepaEmpleado { get; set; }
-        public DateTime DepaManager { get; set; }
+        //public DateTime DepaEmpleado { get; set; }
+        //public DateTime DepaManager { get; set; }
     }
 
     [Route("api/[controller]")]
@@ -44,7 +45,7 @@ namespace EmployeesWebService.Controllers
 
 
             var context = new employeesContext ();
-            //var employees = context.Employees.Where<Employees> (e => e.LastName.Contains ("Smith"));
+            //var employees = context.Employees.Where<Employees>(e => e.LastName.Contains("Smith"));
 
             //
             // SELECT employees.first_name, employees.last_name, titles.title, salaries.salary
@@ -53,21 +54,19 @@ namespace EmployeesWebService.Controllers
             // INNER JOIN inner join dept_emp on employees.emp_no = dept_emp.emp_no
             // INNER JOIN dept_manager on employees.emp_no = dept_manager.emp_no
             // WHERE employees.last_name like 'smith';
-            //
+
             var employees = from e in context.Employees
                             join t in context.Titles on e.EmpNo equals t.EmpNo
                             join s in context.Salaries on e.EmpNo equals s.EmpNo
-                            join de in context.DeptEmp on e.EmpNo equals de.EmpNo
-                            join dm in context.DeptManager on e.EmpNo equals dm.EmpNo
-                            /*where e.LastName.Contains ("Smith")*/ select new Empleado
+                            where e.LastName.Contains ("Smith")
+                            select new Empleado
                             {
+                                EmpNo = e.EmpNo,
                                 Nombre = e.FirstName,
-                                Apellidos =  e.LastName,
+                                Apellidos = e.LastName,
                                 Titulo = t.Title,
                                 Salario = s.Salary,
-                                DepaEmpleado = de.FromDate,
-                                DepaManager = dm.FromDate
-                            };
+                                };
 
 
             var options = new MemoryCacheEntryOptions ()
