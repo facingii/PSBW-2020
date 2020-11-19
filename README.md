@@ -6,3 +6,5 @@ Programación de Sistemas Basados en Web - Curso Septiembre 2020 - Enero 2021
 **ASP.Net Core**
   * Employees2020 - Laboratorio que muestra el desarrollo de una webapp utilizando ASP.Net Core MVC, EntityFrameworkCore y una BD MySQL
   
+**WebClient**
+  * WebClient - Laboratorio que muestra el desarrollo del cliente para la aplicación web api.
