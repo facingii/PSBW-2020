@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using EmployeesWebService.Models;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using System.Net.Http.Headers;
 
 namespace EmployeesWebService.Controllers
 {
@@ -24,8 +25,8 @@ namespace EmployeesWebService.Controllers
     [Route("api/[controller]")]
     public class EmployeesController : Controller
     {
-        private const string EMPLOYEES_KEY = "empleadodelmes";
-        private const string EMPLOYEES_LIST = "listadeempleados";
+        private const string EMPLOYEES_KEY = "employeeKey";
+        private const string EMPLOYEES_LIST = "employeeList";
         private IMemoryCache cache;
 
         public EmployeesController (IMemoryCache cache)
@@ -37,45 +38,43 @@ namespace EmployeesWebService.Controllers
         [HttpGet]
         public IEnumerable<Empleado> Get ()
         {
-            var cachado = cache.Get<List<Empleado>>(EMPLOYEES_LIST);
-            if (cachado != null)
-            {
-                return cachado;
-            }
-
+            //var cachado = cache.Get<List<Empleado>>(EMPLOYEES_LIST);
+            //if (cachado != null) {
+            //    return cachado;
+            //}
 
             var context = new employeesContext ();
             //var employees = context.Employees.Where<Employees>(e => e.LastName.Contains("Smith"));
 
             //
             // SELECT employees.first_name, employees.last_name, titles.title, salaries.salary
-            // FROM employees INNER JOIN titles on employees.emp_no = titles.emp_no
-            // INNER JOIN salaries on employees.emp_no = salaries.emp_no
-            // INNER JOIN inner join dept_emp on employees.emp_no = dept_emp.emp_no
-            // INNER JOIN dept_manager on employees.emp_no = dept_manager.emp_no
-            // WHERE employees.last_name like 'smith';
-
+            // FROM employees INNER JOIN titles ON employees.emp_no = titles.emp_no
+            // INNER JOIN salaries ON employees.emp_no = salaries.emp_no
+            // INNER JOIN inner join dept_emp ON employees.emp_no = dept_emp.emp_no
+            // INNER JOIN dept_manager ON employees.emp_no = dept_manager.emp_no
+            // WHERE employees.last_name like 'smith'
             var employees = from e in context.Employees
-                            join t in context.Titles on e.EmpNo equals t.EmpNo
-                            join s in context.Salaries on e.EmpNo equals s.EmpNo
-                            where e.LastName.Contains ("Smith")
+                            //join s in context.Salaries on e.EmpNo equals s.EmpNo
+                            //join t in context.Titles on e.EmpNo equals t.EmpNo
+                            orderby e.EmpNo ascending
                             select new Empleado
                             {
                                 EmpNo = e.EmpNo,
                                 Nombre = e.FirstName,
                                 Apellidos = e.LastName,
-                                Titulo = t.Title,
-                                Salario = s.Salary,
-                                };
+                                Titulo = "",
+                                Salario = 0,
+                            };
+
+            employees = employees.Take(50);
 
 
-            var options = new MemoryCacheEntryOptions ()
-            {
-                Priority = CacheItemPriority.High,
-                AbsoluteExpiration = DateTime.Now.AddMinutes(3)
-            };
-      
-            cache.Set (EMPLOYEES_LIST, employees.ToList (), options);
+            //var options = new MemoryCacheEntryOptions {
+            //    Priority = CacheItemPriority.High,
+            //    AbsoluteExpiration = DateTime.Now.AddMinutes (3)
+            //};
+
+            //cache.Set (EMPLOYEES_LIST, employees.ToList (), options);
 
             return employees;
         }
@@ -84,84 +83,82 @@ namespace EmployeesWebService.Controllers
         [HttpGet("{id}")]
         public Employees Get (int id)
         {
-            var cachado = cache.Get<Employees> (EMPLOYEES_KEY);
-            if (cachado != null)
-            {
-                return cachado;
-            }  
+            //var cachado = cache.Get<Employees> (id);
+
+            //if (cachado != null) {
+            //    return cachado;
+            //}  
 
             var context = new employeesContext ();
 
             Employees employee = context.Employees.Where<Employees>(e => e.EmpNo == id).FirstOrDefault<Employees>(); 
-            if (employee == null)
-            {
+            if (employee == null) {
                 return null;
             }
 
-            var options = new MemoryCacheEntryOptions
-            {
-                 Priority = CacheItemPriority.Normal,
-                 AbsoluteExpiration = DateTime.Now.AddMinutes (30)
-            };
+            //var options = new MemoryCacheEntryOptions {
+            //     Priority = CacheItemPriority.Normal,
+            //     AbsoluteExpiration = DateTime.Now.AddMinutes (30)
+            //};
 
-            cache.Set<Employees>(EMPLOYEES_KEY, employee, options);
+            //cache.Set<Employees>(employee.EmpNo, employee, options);
+
             return employee;
         }
 
         // POST api/values
         [HttpPost]
-        public void Post ([FromBody] Mixed value)
+        public IActionResult Post ([FromBody] Employees value)
         {
-            var context = new employeesContext ();
+            bool error = false;
 
-            using (var transaction = context.Database.BeginTransaction ())
-            {
-                Employees employee = new Employees
-                {
-                    EmpNo = value.emp_no,
-                    BirthDate = value.birth_name,
-                    FirstName = value.FirstName,
-                    LastName = value.LastName,
-                    Gender = value.Gender,
-                    HireDate = value.HireDate
-                };
-
-                Departments deparment = new Departments
-                {
-                    DeptNo = value.DeptNo,
-                    DeptName = value.DeptName
-                };
-
-                context.Employees.Add (employee);
-                context.Departments.Add (deparment);
-
-                try
-                {
-                    context.SaveChanges ();
-                    transaction.Commit ();
-                } catch (Exception ex)
-                {
-                    //logger.LogError (ex.Message);
-                }
+            try {
+                var context = new employeesContext();
+                context.Employees.Add (value);
+                context.SaveChanges ();
+            } catch (Exception ex) {
+                Console.WriteLine(ex.InnerException.Message);
+                error = true;
             }
+
+            var result = new {
+                Status = !error ? "Success" : "Fail"
+            };
+
+            return new JsonResult (result);
         }
 
         // PUT api/values/5
         [HttpPut("{id}")]
-        public void Put (int id, [FromBody] Employees value)
+        public IActionResult Put (int id, [FromBody] Employees value)
         {
-            var context = new employeesContext ();
+            bool error = false;
 
-            var employee = context.Employees.Where<Employees> (e => e.EmpNo == id).FirstOrDefault ();
-            if (employee == null) return;
+            try
+            {
+                var context = new employeesContext();
 
-            employee.BirthDate = value.BirthDate;
-            employee.FirstName = value.FirstName;
-            employee.LastName = value.LastName;
-            employee.Gender = value.Gender;
-            employee.HireDate = value.HireDate;
+                var employee = context.Employees.Where<Employees>(e => e.EmpNo == id).FirstOrDefault();
+                if (employee == null) {
+                    return new JsonResult (new { Status = "Fail" });;
+                }
 
-            context.SaveChanges ();
+                employee.BirthDate = value.BirthDate;
+                employee.FirstName = value.FirstName;
+                employee.LastName = value.LastName;
+                employee.Gender = value.Gender;
+                employee.HireDate = value.HireDate;
+
+                context.SaveChanges();
+            } catch {
+                error = true;
+            }
+
+            var result = new {
+                Status = !error ? "Success" : "Fail"
+            };
+
+            return new JsonResult (result);
         }
 
         // DELETE api/values/5
