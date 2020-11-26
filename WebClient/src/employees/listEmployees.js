@@ -1,4 +1,6 @@
 import React from 'react';
+import {Link} from 'react-router-dom';
+import axios from 'axios';
 
 class EmployeesList extends React.Component {
 
@@ -10,6 +12,8 @@ class EmployeesList extends React.Component {
 			isFetched: false,
 			error: null
 		};
+
+		this.deleteEmployee = this.deleteEmployee.bind(this);
 
 	}
 
@@ -38,6 +42,19 @@ class EmployeesList extends React.Component {
 		)
 	}
 
+	deleteEmployee (id) {
+		console.log(id);
+
+		axios.delete ("http://localhost:5001/api/employees/")
+			.then (response => {
+				if (response.status === 200) {
+					if (response.data.staus === "Success") {
+						alert("Registro eliminado!");
+					}
+				}
+			});
+	}
+
 	render () {
 		const { items, isFetched, error } = this.state;
 
@@ -50,7 +67,7 @@ class EmployeesList extends React.Component {
 					</div>);
 		} else {
 			return (
-				<table className="table">
+				<table className="table table stripped">
 					<thead className="listHeader">
 						<tr>
 							<th>Nombre</th>
@@ -68,8 +85,8 @@ class EmployeesList extends React.Component {
 										<td>{i.apellidos}</td>
 										<td>{i.titulo}</td>
 										<td>{i.salario}</td>
-										<td>Editar</td>
-										<td>Eliminar</td>
+										<td><Link to={"/edit/"+i.empNo} className="btn btn-success">Editar</Link></td>
+										<td><button type="button" onClick={() => this.deleteEmployee(i.empNo)} className="btn btn-danger">Eliminar</button></td>
 									</tr>
 							)
 						}

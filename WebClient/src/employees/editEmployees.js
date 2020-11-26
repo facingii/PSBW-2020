@@ -27,8 +27,32 @@ class AddEmployees extends React.Component {
 			FirstName: '',
 			LastName: '',
 			BirthDate: '',
-			HireDate: ''
+			HireDate: '',
+			ID: ''
 		}
+	}
+
+	componentDidMount () {
+		const id = this.props.match.params.id;
+
+		axios.get ('http://localhost:5001/api/employees/' + id)
+		.then (response => {
+			if (response.status === 200) {
+				this.setState (
+					{
+						EmpNo: response.data.empNo,
+						FirstName: response.data.firstName,
+						LastName: response.data.lastName,
+						BirthDate: response.data.birthDate,
+						HireDate: response.data.hireDate,
+						ID: id
+					}
+				);	
+			}
+		})
+		.catch (function (error) {
+			console.log(error);
+		})
 	}
 
 	// función de envío de datos al backend
@@ -42,22 +66,22 @@ class AddEmployees extends React.Component {
 			"hireDate":this.state.HireDate	
 		}
 
-		axios.post ('http://localhost:5001/api/employees', JSON.stringify(data), {
+		axios.put ('http://localhost:5001/api/employees/'+this.state.ID, JSON.stringify(data), {
 			headers: {
 				'Accept': 'application/json',
 				'Content-type': 'application/json'
 			}
 		}).then (json => {
+			console.log(json.data.status);
 			if (json.data.status === 'Success') {
 				alert("Data saved!");
 				//this.props.history.push('/employeesList');
 			} else {
 				alert('Data not saved!');
 				//debugger;
-				//this.props.history.push('employeesList');
+				//this.props.history.push('/employeesList');
 			}
 		})
-
 	}
 
 	// modifica el estado del formulario de acuerdo a los valores
@@ -78,17 +102,17 @@ class AddEmployees extends React.Component {
 						<FormGroup row>
 							<Label for="name" sm={2}>No. Employee</Label>
 							<Col sm={2}>
-								<Input type="text" name="EmpNo" onChange={this.handleChange} value={this.state.EmpNo} />
+								<Input type="text" name="EmpNo" onChange={this.handleChange} value={this.state.EmpNo} disabled />
 							</Col>
 						</FormGroup>
 						<FormGroup row>
-							<Label for="name" sm={2}>First Name</Label>
+							<Label for="name" sm={2}>Name</Label>
 							<Col sm={2}>
 								<Input type="text" name="FirstName" onChange={this.handleChange} value={this.state.FirstName} />
 							</Col>
 						</FormGroup>
 						<FormGroup row>
-							<Label for="name" sm={2}>Last Name</Label>
+							<Label for="name" sm={2}>First Name</Label>
 							<Col sm={2}>
 								<Input type="text" name="LastName" onChange={this.handleChange} value={this.state.LastName} />
 							</Col>
@@ -126,4 +150,4 @@ class AddEmployees extends React.Component {
 	}
 }
 
-export default AddEmployees;
+export default AddEmployees;	
