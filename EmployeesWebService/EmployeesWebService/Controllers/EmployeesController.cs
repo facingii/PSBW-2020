@@ -8,6 +8,7 @@ using EmployeesWebService.Models;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using System.Net.Http.Headers;
+using Microsoft.AspNetCore.Authorization;
 
 namespace EmployeesWebService.Controllers
 {
@@ -34,7 +35,7 @@ namespace EmployeesWebService.Controllers
             this.cache = cache;
         }
 
-        // GET: api/values
+        [Authorize]
         [HttpGet]
         public IEnumerable<Empleado> Get ()
         {

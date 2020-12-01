@@ -1,15 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using EmployeesWebService.Helpers;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace EmployeesWebService
 {
@@ -29,14 +24,42 @@ namespace EmployeesWebService
             services.AddMemoryCache ();
             services.AddCors(options =>
            {
-               options.AddDefaultPolicy(builder =>
+               options.AddDefaultPolicy (builder =>
                {
-                   builder.AllowAnyOrigin();
-                   builder.AllowAnyMethod();
-                   builder.AllowAnyHeader();
+                   builder.AllowAnyOrigin ();
+                   builder.AllowAnyMethod ();
+                   builder.AllowAnyHeader ();
                });
-
            });
+
+            // habilitando JWT Authentication
+            var jwtSection = Configuration.GetSection ("JwtSettings");
+            services.Configure<JWTSettings>(jwtSection);
+
+            var jwtSettings = jwtSection.Get<JWTSettings>();
+            var key = System.Text.Encoding.ASCII.GetBytes (jwtSettings.Secret);
+
+            services.AddAuthentication(x =>
+           {
+               x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+               x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+           }).AddJwtBearer(y =>
+           {
+               y.RequireHttpsMetadata = false;
+               y.SaveToken = true;
+               y.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+               {
+                   ValidateIssuerSigningKey = true,
+                   IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey (key),
+                   ValidateIssuer = false,
+                   ValidateAudience = false
+               };
+           });
+
+
+            services.AddScoped<IUserService, UserService>();
+
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -48,6 +71,8 @@ namespace EmployeesWebService
             }
 
             app.UseCors();
+
+            app.UseAuthentication();
 
             app.UseHttpsRedirection();
 
