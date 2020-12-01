@@ -16,10 +16,10 @@ namespace EmployeesWebService.Helpers
             new User ()
             {
                 Id = 1,
-                FirstName = "Diana",
-                LastName = "Montejo Arroyo",
-                UserName = "dmontejo",
-                Password = "montejoarroyo",
+                FirstName = "Daenarys",
+                LastName = "Targaryen",
+                UserName = "danytargaryen",
+                Password = "fireandblood",
                 Token = ""
             }
         };
