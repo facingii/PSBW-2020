@@ -44,7 +44,7 @@ namespace EmployeesWebService.Helpers
                 Subject = new System.Security.Claims.ClaimsIdentity(new Claim[] {
                     new Claim (ClaimTypes.Name, user.Id.ToString ())
                 }),
-                Expires = DateTime.Now.AddDays(1),
+                Expires = DateTime.Now.AddDays (1),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
 

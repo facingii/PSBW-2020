@@ -23,6 +23,7 @@ namespace EmployeesWebService.Controllers
         //public DateTime DepaManager { get; set; }
     }
 
+    [Authorize]
     [Route("api/[controller]")]
     public class EmployeesController : Controller
     {
@@ -35,7 +36,6 @@ namespace EmployeesWebService.Controllers
             this.cache = cache;
         }
 
-        [Authorize]
         [HttpGet]
         public IEnumerable<Empleado> Get ()
         {

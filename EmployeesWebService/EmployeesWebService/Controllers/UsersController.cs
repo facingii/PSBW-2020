@@ -25,7 +25,7 @@ namespace EmployeesWebService.Controllers
 
             if (user == null)
             {
-                return BadRequest(new { message = "Username or Password is incorrect!" });
+                return BadRequest (new { message = "Username or Password is incorrect!" });
             }
 
             return Ok (user);
