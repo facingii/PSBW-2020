@@ -2,6 +2,7 @@
 import EmployeesList from './employees/listEmployees.js';
 import AddEmployees from './employees/addEmployees.js';
 import EditEmployees from './employees/editEmployees.js';
+import Login from './login/login.js'
 
 import './App.css'
 
@@ -12,7 +13,9 @@ import {
 	Route
 } from 'react-router-dom'; 
 
+
 function App () {
+
 	return (
 		<Router>
 			<div className="container">
@@ -32,12 +35,14 @@ function App () {
 				<Switch>
 					<Route exact path='/AddEmployee' component={AddEmployees} />
 					<Route path='/edit/:id' component={EditEmployees} />
-					<Route path='/EmployeesList' component={EmployeesList} /> 
+					<Route path='/EmployeesList' component={EmployeesList} />
+					<Route exact path='/login' component={Login} />
 				</Switch>	
 			</div>
 		</Router>
 		
 	);
+	
 }
 
 export default App;

@@ -1,5 +1,5 @@
 import React from 'react';
-import {Link} from 'react-router-dom';
+import {Link, Redirect} from 'react-router-dom';
 import axios from 'axios';
 
 class EmployeesList extends React.Component {
@@ -7,10 +7,13 @@ class EmployeesList extends React.Component {
 	constructor (props) {
 		super(props);
 
+		const tk = localStorage.getItem('ACCESS_TOKEN');
+
 		this.state = {
 			items: [],
 			isFetched: false,
-			error: null
+			error: null,
+			Token: tk
 		};
 
 		this.deleteEmployee = this.deleteEmployee.bind(this);
@@ -18,7 +21,14 @@ class EmployeesList extends React.Component {
 	}
 
 	componentDidMount () {
-		fetch("http://localhost:5001/api/employees/")
+		fetch("http://localhost:5001/api/employees/", 
+		{
+			headers: {
+				'Accept': 'application/json',
+				'Content-type': 'application/json',
+				'Authorization': 'Bearer ' + this.state.Token
+			}
+		})
 		.then(res => res.json())
 		.then(
 			(result) => {
@@ -43,9 +53,7 @@ class EmployeesList extends React.Component {
 	}
 
 	deleteEmployee (id) {
-		console.log(id);
-
-		axios.delete ("http://localhost:5001/api/employees/")
+		axios.delete ("http://localhost:5001/api/employees/" + id)
 			.then (response => {
 				if (response.status === 200) {
 					if (response.data.staus === "Success") {
@@ -58,8 +66,16 @@ class EmployeesList extends React.Component {
 	render () {
 		const { items, isFetched, error } = this.state;
 
-
-		if (error) {
+		if (!this.state.Token) {
+			return (
+				<Redirect to={{ 
+					pathname: '/login', 
+					state: { 
+						from: this.props.location 
+					} 
+				}} />
+			);
+		} else if (error) {
 			return (<div><p>{error.message}</p></div>);
 		} else if (!isFetched) {
 			return (<div>
