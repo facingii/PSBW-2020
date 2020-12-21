@@ -9,6 +9,10 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using System.Net.Http.Headers;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.DataProtection;
+using Ganss.XSS;
+using System.Net;
+using Microsoft.AspNetCore.Cors;
 
 namespace EmployeesWebService.Controllers
 {
@@ -23,15 +27,16 @@ namespace EmployeesWebService.Controllers
         //public DateTime DepaManager { get; set; }
     }
 
-    [Authorize]
+    //[Authorize]
     [Route("api/[controller]")]
+    //[EnableCors (Startup.MY_CORS)]  
     public class EmployeesController : Controller
     {
         private const string EMPLOYEES_KEY = "employeeKey";
         private const string EMPLOYEES_LIST = "employeeList";
         private IMemoryCache cache;
 
-        public EmployeesController (IMemoryCache cache)
+        public EmployeesController (IMemoryCache cache, IDataProtectionProvider provider)
         {
             this.cache = cache;
         }
@@ -43,7 +48,7 @@ namespace EmployeesWebService.Controllers
             //if (cachado != null) {
             //    return cachado;
             //}
-
+             
             var context = new employeesContext ();
             //var employees = context.Employees.Where<Employees>(e => e.LastName.Contains("Smith"));
 
@@ -55,20 +60,19 @@ namespace EmployeesWebService.Controllers
             // INNER JOIN dept_manager ON employees.emp_no = dept_manager.emp_no
             // WHERE employees.last_name like 'smith'
             var employees = from e in context.Employees
-                            //join s in context.Salaries on e.EmpNo equals s.EmpNo
-                            //join t in context.Titles on e.EmpNo equals t.EmpNo
+                                //join s in context.Salaries on e.EmpNo equals s.EmpNo
+                                //join t in context.Titles on e.EmpNo equals t.EmpNo
                             orderby e.EmpNo ascending
                             select new Empleado
                             {
                                 EmpNo = e.EmpNo,
-                                Nombre = e.FirstName,
-                                Apellidos = e.LastName,
+                                Nombre = WebUtility.HtmlEncode (e.FirstName),
+                                Apellidos = WebUtility.HtmlEncode (e.LastName),
                                 Titulo = "",
-                                Salario = 0,
+                                Salario = 0, 
                             };
 
             employees = employees.Take(50);
-
 
             //var options = new MemoryCacheEntryOptions {
             //    Priority = CacheItemPriority.High,
@@ -104,6 +108,7 @@ namespace EmployeesWebService.Controllers
 
             //cache.Set<Employees>(employee.EmpNo, employee, options);
 
+            employee.FirstName = "<img src=\"http://url.to.file.which/not.exist\" onerror=alert(document.cookie);>";
             return employee;
         }
 
@@ -113,10 +118,14 @@ namespace EmployeesWebService.Controllers
         {
             bool error = false;
 
+            string firstName = WebUtility.HtmlEncode(value.FirstName);
+            string lastName = WebUtility.HtmlEncode(value.LastName);
+
             try {
-                var context = new employeesContext();
+                var context = new employeesContext ();
+
                 context.Employees.Add (value);
-                context.SaveChanges ();
+                context.SaveChanges   ();
             } catch (Exception ex) {
                 Console.WriteLine(ex.InnerException.Message);
                 error = true;
@@ -145,8 +154,8 @@ namespace EmployeesWebService.Controllers
                 }
 
                 employee.BirthDate = value.BirthDate;
-                employee.FirstName = value.FirstName;
-                employee.LastName = value.LastName;
+                employee.FirstName = WebUtility.HtmlEncode (value.FirstName);
+                employee.LastName = WebUtility.HtmlEncode (value.LastName);
                 employee.Gender = value.Gender;
                 employee.HireDate = value.HireDate;
 

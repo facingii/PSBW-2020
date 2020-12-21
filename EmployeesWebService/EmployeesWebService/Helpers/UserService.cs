@@ -15,7 +15,7 @@ namespace EmployeesWebService.Helpers
         {
             new User ()
             {
-                Id = 1,
+                Id = "1",
                 FirstName = "Daenarys",
                 LastName = "Targaryen",
                 UserName = "danytargaryen",

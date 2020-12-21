@@ -1,6 +1,9 @@
-﻿using EmployeesWebService.Helpers;
+﻿using System;
+using System.Text;
+using EmployeesWebService.Helpers;
 using EmployeesWebService.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EmployeesWebService.Controllers
@@ -11,10 +14,12 @@ namespace EmployeesWebService.Controllers
     public class UsersController : Controller
     {
         private IUserService _userService;
+        private IDataProtector protector;
 
-        public UsersController (IUserService userService)
+        public UsersController (IUserService userService, IDataProtectionProvider provider)
         {
             _userService = userService;
+            this.protector = provider.CreateProtector ("ProtectorID");
         }
 
         [AllowAnonymous]
@@ -28,7 +33,20 @@ namespace EmployeesWebService.Controllers
                 return BadRequest (new { message = "Username or Password is incorrect!" });
             }
 
-            return Ok (user);
+            var foo = new User ();
+
+            var bar = this.protector.Protect (user.Id);
+            foo.Id = bar;
+ 
+            //bar = this.protector.Protect (System.Text.Encoding.UTF8.GetBytes (user.UserName));
+            //foo.UserName = System.Text.Encoding.UTF8.GetString (bar);
+
+            /*foo.FirstName = user.FirstName;
+            foo.LastName = user.LastName;
+            foo.Password = user.Password;*/
+            foo.Token = user.Token;
+
+            return Ok (foo);
         }
 
         [HttpGet]
@@ -36,6 +54,13 @@ namespace EmployeesWebService.Controllers
         {
             var users = _userService.GetAll ();
             return Ok (users);
+        }
+
+        [HttpGet("getuser/{cipherID}")]
+        public User GetUser (string cipherID)
+        {
+            var id = this.protector.Unprotect (cipherID);
+            return null;
         }
     }
 }
